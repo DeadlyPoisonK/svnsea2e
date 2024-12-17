@@ -10,7 +10,7 @@
     </li>
     {{#each advantages as |item id|}}
       <li class="item flexrow advantage" data-item-id="{{item._id}}">
-        <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" /></div>
+        <div class="item-image item-throw"><img src="{{item.img}}" title="{{item.name}}" /></div>
         <h4 class="item-name">{{item.name}}{{#if item.system.knack}}<span title="{{localize 'SVNSEA2E.Knack'}}"><i class="fas fa-award"></i></span>{{/if}}{{#if item.system.innate}}<span title="{{localize 'SVNSEA2E.Innate'}}"><i class="fas fa-male"></i></span>{{/if}}</h4>
         <div class="item-controls">
           <a class="item-control item-edit" title="{{item.editlabel}}"><i class="fas fa-edit"></i></a>
@@ -28,7 +28,7 @@
     </li>
     {{#each duelstyles as |item id|}}
       <li class="item flexrow duelingstyle" data-item-id="{{item._id}}">
-        <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" /></div>
+        <div class="item-image item-throw"><img src="{{item.img}}" title="{{item.name}}" /></div>
         <h4 class="item-name">{{item.name}}</h4>
         <div class="item-controls">
           <a class="item-control item-edit" title="{{item.editlabel}}"><i class="fas fa-edit"></i></a>
@@ -46,7 +46,7 @@
       </li>
       {{#each backgrounds as |item id|}}
         <li class="item flexrow background" data-item-id="{{item._id}}">
-          <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" /></div>
+          <div class="item-image item-throw"><img src="{{item.img}}" title="{{item.name}}" /></div>
           <h4 class="item-name">{{item.name}}</h4>
           <div class="item-controls">
             <a class="item-control item-edit" title="{{item.editlabel}}"><i class="fas fa-edit"></i></a>
@@ -64,7 +64,7 @@
       </li>
       {{#each secretsocieties as |item id|}}
         <li class="item flexrow secretsociety" data-item-id="{{item._id}}">
-          <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" /></div>
+          <div class="item-image item-throw"><img src="{{item.img}}" title="{{item.name}}" /></div>
           <h4 class="item-name">{{item.name}}</h4><span class="flavor tag"><strong >{{localize 'SVNSEA2E.Favor'}}</strong>: {{item.system.favor}}</span>
           <div class="item-controls">
             <a class="item-control item-edit" title="{{item.editlabel}}"><i class="fas fa-edit"></i></a>

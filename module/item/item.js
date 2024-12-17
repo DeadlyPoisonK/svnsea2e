@@ -6,6 +6,21 @@ export class SvnSea2EItem extends Item {
   /**
    * Augment the basic Item data model with additional dynamic data.
    */
+
+  chatTemplate = {
+    "advantage": 'systems/svnsea2e/templates/items/parts/skill-throw.hbs',
+    "background": 'systems/svnsea2e/templates/items/parts/skill-throw-background.hbs',
+    "sorcery": 'systems/svnsea2e/templates/items/parts/skill-throw.hbs',
+    "secretsociety": 'systems/svnsea2e/templates/items/parts/skill-throw.hbs',
+    "story": 'systems/svnsea2e/templates/items/parts/skill-throw.hbs',  
+    "duelstyle": 'systems/svnsea2e/templates/items/parts/skill-throw.hbs',
+    "artifact": 'systems/svnsea2e/templates/items/parts/skill-throw.hbs',
+    "virtue": 'systems/svnsea2e/templates/items/parts/skill-throw.hbs',
+    "hubris": 'systems/svnsea2e/templates/items/parts/skill-throw.hbs',  
+    }
+  
+
+
   prepareData() {
     super.prepareData();
 
@@ -186,4 +201,38 @@ export class SvnSea2EItem extends Item {
       data.influence.max,
     );
   }
+
+
+  async ItemThrow(event) {   
+    const element = this;
+    const system = element.system;
+
+    // Datos del mensaje de chat
+    let chatData = {
+        user: game.user._id,
+        speaker: ChatMessage.getSpeaker(),
+        /*buttons: {
+            button1: {
+                label: "Button #1",
+                callback: () => { ui.notifications.info("Button #1 Clicked!"); },
+                icon: `<i class="fas fa-check"></i>`
+            }
+        }*/
+    };
+
+    // Datos de la tarjeta
+    let cardData = {
+        ...element, // Si estás utilizando datos específicos del sistema, mejor usa 'system' en lugar de 'this.system'
+        owner: this.actor.id
+    };
+    
+    // Renderizar la plantilla y asignarla al contenido del chat
+    chatData.content = await renderTemplate(this.chatTemplate[element.type], cardData);
+
+    // Indicar que se trata de una tirada
+    chatData.roll = true;
+
+    // Crear el mensaje de chat
+    return ChatMessage.create(chatData);
+}
 }

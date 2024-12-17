@@ -4,7 +4,7 @@
   <div class="traits grid grid-3col">
     {{#each traits as |trait key|}}
       <div class="trait flexrow flex-group flex-left">
-        <span class="trait-name">
+        <span class="trait-name rollableT" data-roll="{{trait.value}}" data-label="{{trait.name}}">
           {{trait.label}}
         </span>
         <span>

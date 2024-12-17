@@ -67,11 +67,12 @@ const _leftOverDice = function (rolls, threshold = 10, incThreshold = false) {
 const _calculBonusDice = function (form) {
   const flairDice = form.flairDice?.checked ? 1 : 0;
   const interpretationDice = form.interpretationDice?.checked ? 1 : 0;
-  const heroDices = parseInt(form.useForMe?.value || 0);
-  const helpDices = parseInt(form.useForHelpMe?.value || 0) * 3;
+  const heroDices = parseInt(form.useForMe?.value || 0, 10);
+  const helpDices = parseInt(form.useForHelpMe?.value || 0, 10) * 3;
+  const bonusDice = parseInt(form.bonusDice?.value || 0, 10);
 
   return (
-    parseInt(form.bonusDice.value) +
+    bonusDice +
     flairDice +
     interpretationDice +
     heroDices +
@@ -105,7 +106,7 @@ const _spendHeroPoint = function (form, actor) {
  *
  * @param actor the actor use for roll
  * @param data the actor data
- *
+ * 
  * @param form data of roll dialog
  * @param form.trait value of attribute
  * @param form.flairDice indicate if flairDice must be add
@@ -123,6 +124,7 @@ const _spendHeroPoint = function (form, actor) {
  */
 export async function roll({
   rolldata = {},
+  initialBonusDice = {},
   actor = {},
   data = {},
   form = {},
@@ -140,7 +142,7 @@ export async function roll({
   }
 
   const skillDice = parseInt(rolldata['skilldice']);
-  const nd = skillDice + parseInt(form.trait.value) + _calculBonusDice(form);
+  const nd = skillDice + parseInt(form.trait.value) + _calculBonusDice(form) + parseInt(initialBonusDice);
 
   const incThreshold =
     form.increaseThreshold !== undefined ? form.increaseThreshold.checked : 0;

@@ -133,4 +133,5 @@ export class SvnSea2EActor extends Actor {
       actorData.wounds.max,
     );
   }
+
 }

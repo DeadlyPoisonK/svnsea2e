@@ -163,6 +163,12 @@ export default class ActorSheetSS2e extends ActorSheet {
       html.find('.rollable').on('click', this._onVillainRoll.bind(this));
     }
 
+    if (this.actor.type === 'playercharacter' || this.actor.type === 'hero') {
+      html.find('.rollableT').on('click', this._onHeroRollT.bind(this));
+    } else if (this.actor.type === 'villain' || this.actor.type === 'monster') {
+      html.find('.rollableT').on('click', this._onVillainRoll.bind(this));
+    }
+
     html
       .find('.fillable.fa-circle')
       .on('click', (event) => this._processCircle(event));
@@ -189,16 +195,29 @@ export default class ActorSheetSS2e extends ActorSheet {
 
   _onAddInitiative(event) {
     event.preventDefault();
-    const initiative = (this.actor.system.initiative || 0) + 1;
-    console.log('new initiative', initiative);
-    updateInitiative(this.actor.id, initiative);
-  }
+    const currentInitiative = Number(this.actor.system.initiative || 0);
+    const newInitiative = currentInitiative + 1;
+    console.log('new initiative', newInitiative);
 
-  _onMinusInitiative(event) {
+    this.actor.update({
+      'system.initiative': newInitiative
+  });
+    // Llama a la función `updateInitiative` para actualizar en combates activos y la hoja de personaje
+    updateInitiative(this.actor.id, newInitiative);
+}
+
+_onMinusInitiative(event) {
     event.preventDefault();
-    const initiative = (this.actor.system.initiative || 0) - 1;
-    updateInitiative(this.actor.id, initiative);
-  }
+    const currentInitiative = Number(this.actor.system.initiative || 0);
+    const newInitiative = currentInitiative - 1;
+    console.log('new initiative', newInitiative);
+
+    this.actor.update({
+      'system.initiative': newInitiative
+  });
+    // Llama a la función `updateInitiative` para actualizar en combates activos y la hoja de personaje
+    updateInitiative(this.actor.id, newInitiative);
+}
 
   /* -------------------------------------------- */
 
@@ -396,14 +415,15 @@ export default class ActorSheetSS2e extends ActorSheet {
     event.preventDefault();
     const li = event.currentTarget.closest('.item');
     const item = this.actor.items.get(li.dataset.itemId);
-
+  
     if (item) {
-      if (item.data.type === 'background')
-        await this._processBackgroundDelete(item.data.data);
-
+      if (item.type === 'background')
+        await this._processBackgroundDelete(item.system);
+  
       return item.delete();
     }
   }
+  
 
   /* -------------------------------------------- */
 
@@ -604,24 +624,37 @@ export default class ActorSheetSS2e extends ActorSheet {
    * @param itemData data for the item that is being deleted
    */
   async _processBackgroundDelete(bkgData) {
-    const actorData = this.actor.data.data;
+    const actor = this.actor; // Accede directamente al actor
     const updateData = {};
+  
+    // Actualiza las habilidades
     for (let i = 0; i < bkgData.skills.length; i++) {
       const skill = bkgData.skills[i];
-      updateData['skills.' + skill + '.value'] =
-        actorData.skills[skill].value - 1;
+      const currentSkillValue = actor.system.skills[skill]?.value || 0;
+      updateData[`system.skills.${skill}.value`] = Math.max(currentSkillValue - 1, 0); // Evita valores negativos
     }
-    await this.actor.update(updateData);
-
-    const charAdvs = await this._getAdvantages();
+  
+    // Aplica la actualización en lote
+    await actor.update(updateData);
+  
+    // Obtén las ventajas (Items) y elimina las correspondientes
+    const charAdvs = await this._getAdvantages(); // Asume que esta función sigue siendo válida
+    const advantagesToDelete = [];
+  
     for (let i = 0; i < bkgData.advantages.length; i++) {
-      for (let j = 0; j < charAdvs.length; j++) {
-        if (charAdvs[j].data.name === bkgData.advantages[i]) {
-          await this.actor.deleteEmbeddedDocuments('Item', [charAdvs[j].id]);
+      const advantageName = bkgData.advantages[i];
+      for (const adv of charAdvs) {
+        if (adv.name === advantageName) {
+          advantagesToDelete.push(adv.id);
         }
       }
     }
+  
+    if (advantagesToDelete.length > 0) {
+      await actor.deleteEmbeddedDocuments('Item', advantagesToDelete);
+    }
   }
+  
 
   /* -------------------------------------------- */
 
@@ -665,6 +698,68 @@ export default class ActorSheetSS2e extends ActorSheet {
    * @param {Event} event   The originating click event
    * @private
    */
+
+  async _onHeroRollT(event) {
+    event.preventDefault();
+    const element = event.currentTarget;
+    const dataset = element.dataset;
+    const actor = this.actor;
+    const data = this.actor.system;
+    console.log(dataset);
+
+    let rolldata = {
+      threshold: 10,
+      explode: false,
+      reroll: false,
+      skilldice: 0,
+    };
+
+    // Render modal dialog
+    const template = 'systems/svnsea2e/templates/chats/trait-roll-dialog.html';
+
+    const initialBonusDice = data.dwounds.value >= 1 ? 1 : 0;
+
+    const dialogData = {
+      data: data,
+      traitmax: data.traits[dataset.label]['value'],
+      initialBonusDice,
+    };
+    
+    
+
+    const html = await renderTemplate(template, dialogData);
+
+    // Create the Dialog window
+    const title = game.i18n.format('SVNSEA2E.TraitRollTitle', {
+      trait: CONFIG.SVNSEA2E.traits[dataset.label],
+    });
+    return new Promise(() => {
+      new Dialog(
+        {
+          title: title,
+          content: html,
+          buttons: {
+            roll: {
+              icon: '<img src="systems/svnsea2e/icons/d10.svg" class="d10">',
+              label: game.i18n.localize('SVNSEA2E.Roll'),
+              callback: (html) =>
+                roll({
+                  rolldata: rolldata,
+                  actor: actor,
+                  data: data,
+                  form: html[0].querySelector('form'),
+                  template: 'systems/svnsea2e/templates/chats/roll-card.html',
+                  title: title,
+                }),
+            },
+          },
+        },
+        {},
+      ).render(true);
+    });
+  }
+  
+  
   async _onHeroRoll(event) {
     event.preventDefault();
     const element = event.currentTarget;
@@ -719,6 +814,7 @@ export default class ActorSheetSS2e extends ActorSheet {
                   rolldata,
                   actor,
                   data,
+                  initialBonusDice,
                   form: html[0].querySelector('form'),
                   template: 'systems/svnsea2e/templates/chats/roll-card.html',
                   title: game.i18n.format('SVNSEA2E.ApproachRollChatTitle', {
@@ -768,6 +864,7 @@ export default class ActorSheetSS2e extends ActorSheet {
       traitmax: data.traits[dataset.label]['value'],
       initialBonusDice,
     };
+    
 
     const html = await renderTemplate(template, dialogData);
 

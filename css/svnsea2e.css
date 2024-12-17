@@ -22,6 +22,45 @@ a:hover {
   text-shadow: 0 0 8px white;
 }
 
+.card-img {
+  height: auto;
+  width: 40px;
+  border: none;
+}
+
+.card-name {
+  flex-direction: row;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  text-align: justify;
+}
+
+.grid-card {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  margin: 10px 0;
+  padding: 0;
+}
+
+.card-div{
+  padding: 5px; /* Espacio interno */
+  border: 2px solid  #530202; /* Borde para cada elemento */
+  border-radius: 10px;
+  text-align: left;
+  margin-bottom: 4px;
+}
+
+.card-description {
+  font-size: small;
+}
+
+
+
+
+
+
+
 h1,
 h2,
 h3,
@@ -249,6 +288,23 @@ input[type=range]::-webkit-slider-thumb {
   background-size: 20px;
   background-repeat: no-repeat;
   padding-left: 20px;
+}
+
+.rollableT:focus, .rollableT:hover {
+  text-shadow: 0 0 10px white;
+  cursor: pointer;
+  background-image: url("../icons/d10.svg");
+  background-size: 20px;
+  background-repeat: no-repeat;
+  padding-left: 20px;
+}
+
+.roll-throw{
+  font-family: "Roboto", sans-serif;
+  font-size: 1em;
+  color: #000;
+  background: white;
+  cursor: pointer;
 }
 
 .grid,

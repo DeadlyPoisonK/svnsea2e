@@ -20,5 +20,6 @@ export function updateInitiative(actorId, raise) {
     .filter((a) => a.id === actorId)
     .map((a) => {
       a.update({ data: { initiative: nRaise } });
+      a.update({ 'system.initiative': nRaise });
     });
 }
